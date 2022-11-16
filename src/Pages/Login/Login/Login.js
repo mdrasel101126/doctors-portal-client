@@ -1,11 +1,28 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../../contexts/AuthProvider";
 
 const Login = () => {
   const { register, handleSubmit } = useForm();
+  const [error, setError] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const from = location.state?.from?.pathname || "/";
+  const { loginUser } = useContext(AuthContext);
   const handleLogin = (data) => {
     console.log(data);
+    loginUser(data.email, data.password)
+      .then((result) => {
+        const user = result.user;
+        console.log(user);
+        setError("");
+        navigate(from, { replace: true });
+      })
+      .catch((error) => {
+        const errorMessage = error.message;
+        setError(errorMessage);
+      });
   };
   return (
     <div className="h-[800px] flex justify-center items-center">
@@ -20,7 +37,6 @@ const Login = () => {
               type="email"
               placeholder="Your Email"
               {...register("email")}
-              required
               className="input input-bordered w-full "
             />
           </div>
@@ -30,16 +46,17 @@ const Login = () => {
             </label>
             <input
               type="password"
-              placeholder="Your Email"
+              placeholder="Your Password"
               {...register("password")}
-              required
               className="input input-bordered w-full "
             />
           </div>
           <label className="label">
             <span className="label-text">
               New to Doctors Portal?
-              <Link className="text-secondary">Create new Account</Link>
+              <Link to="/register" className="text-secondary">
+                Create new Account
+              </Link>
             </span>
           </label>
           <input
@@ -47,6 +64,7 @@ const Login = () => {
             type="submit"
             value="Login"
           />
+          {error && <p className="text-red-600">{error}</p>}
         </form>
         <div className="divider">OR</div>
         <button className="btn btn-outline w-full">Continue With Google</button>

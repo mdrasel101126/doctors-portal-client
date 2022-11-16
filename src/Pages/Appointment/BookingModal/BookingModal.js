@@ -1,24 +1,45 @@
 import { format } from "date-fns";
-import React from "react";
+import React, { useContext } from "react";
+import toast from "react-hot-toast";
+import { AuthContext } from "../../../contexts/AuthProvider";
 
-const BookingModal = ({ treatment, selectedDate }) => {
+const BookingModal = ({ treatment, selectedDate, setTreatment, refetch }) => {
   const { name, slots } = treatment;
   const date = selectedDate ? format(selectedDate, "PP") : null;
+  const { user } = useContext(AuthContext);
   const handleBooking = (event) => {
     event.preventDefault();
     const form = event.target;
     const slot = form.slot.value;
-    const name = form.name.value;
+    const patientName = form.name.value;
     const email = form.email.value;
     const phone = form.phone.value;
     const booking = {
       appointmentDate: date,
-      name,
+      treatmentName: name,
+      patientName,
       email,
       phone,
       slot,
     };
-    console.log(date, slot, name, email, phone);
+    //console.log(booking);
+    fetch("http://localhost:5000/bookings", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(booking),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.acknowledged) {
+          toast.success("Booking Confirmed Successfully");
+          setTreatment(null);
+          refetch();
+        } else {
+          toast.error(data.message);
+        }
+      });
   };
   return (
     <>
@@ -55,12 +76,16 @@ const BookingModal = ({ treatment, selectedDate }) => {
               type="text"
               placeholder="Your Name"
               name="name"
+              defaultValue={user.displayName}
+              disabled
               className="input input-bordered w-full "
             />
             <input
               type="email"
               placeholder="Your Email"
               name="email"
+              defaultValue={user.email}
+              disabled
               className="input input-bordered w-full "
             />
             <input

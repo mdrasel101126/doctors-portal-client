@@ -1,7 +1,19 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../../../contexts/AuthProvider";
 
 const Header = () => {
+  const { user, logOut } = useContext(AuthContext);
+  const handleLogOut = () => {
+    logOut()
+      .then(() => {
+        //log out successfully
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  };
+  console.log(user?.displayName);
   const navItems = (
     <React.Fragment>
       <li>
@@ -13,14 +25,23 @@ const Header = () => {
       <li>
         <Link to="appointment">Appointment</Link>
       </li>
+
       <li>
-        <Link>Reviews</Link>
-      </li>
-      <li>
-        <Link to="/login">Login</Link>
+        {user?.uid ? (
+          <>
+            <Link to="/dashboard">Dashboard</Link>
+
+            {user.displayName && <p>{user.displayName}</p>}
+
+            <button onClick={handleLogOut}>Log Out</button>
+          </>
+        ) : (
+          <Link to="/login">Login</Link>
+        )}
       </li>
     </React.Fragment>
   );
+
   return (
     <div className="navbar bg-base-100">
       <div className="navbar-start">
