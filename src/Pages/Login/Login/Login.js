@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../../contexts/AuthProvider";
+import useToken from "../../../useToken/useToken";
 
 const Login = () => {
   const { register, handleSubmit } = useForm();
@@ -10,14 +11,21 @@ const Login = () => {
   const navigate = useNavigate();
   const from = location.state?.from?.pathname || "/";
   const { loginUser } = useContext(AuthContext);
+  const [loginUserEmail, setLoginUserEmail] = useState("");
+  const [token] = useToken(loginUserEmail);
+
+  if (token) {
+    navigate(from, { replace: true });
+  }
   const handleLogin = (data) => {
     console.log(data);
     loginUser(data.email, data.password)
       .then((result) => {
         const user = result.user;
         console.log(user);
+
         setError("");
-        navigate(from, { replace: true });
+        setLoginUserEmail(data.email);
       })
       .catch((error) => {
         const errorMessage = error.message;
