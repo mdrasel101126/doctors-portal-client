@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useContext } from "react";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../../../contexts/AuthProvider";
 import Loading from "../../Shared/Loading/Loading";
 
@@ -21,7 +22,7 @@ const MyAppointment = () => {
   /* if (isLoading) {
     return <Loading></Loading>;
   } */
-  console.log(bookings);
+  // console.log(bookings);
   return (
     <div>
       <h1 className="text-3xl">My appointment</h1>
@@ -34,16 +35,27 @@ const MyAppointment = () => {
               <th>Treatment</th>
               <th>Date</th>
               <th>Time</th>
+              <th>Payment</th>
             </tr>
           </thead>
           <tbody>
-            {bookings.map((booking, index) => (
-              <tr key={booking._id} className="hover">
+            {bookings?.map((booking, index) => (
+              <tr key={booking._id}>
                 <th>{index + 1}</th>
                 <th>{booking.patientName}</th>
                 <td>{booking.treatmentName}</td>
                 <td>{booking.appointmentDate}</td>
                 <td>{booking.slot}</td>
+                <td>
+                  {booking.price && !booking.paid && (
+                    <Link to={`/dashboard/payment/${booking._id}`}>
+                      <button className="btn btn-primary btn-sm">Pay</button>
+                    </Link>
+                  )}
+                  {booking.price && booking.paid && (
+                    <span className="text-primary">Paid</span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
